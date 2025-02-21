@@ -466,9 +466,8 @@ def _device_put_sharding_impl(x, aval, device, copy):
     if not s.is_fully_addressable:
       if ((isinstance(x, array.ArrayImpl) and not x._committed) or
           type(x) in array_types):
-        # TODO(emilyaf): Remove this condition when jit works when a sharding
-        # has no local devices.
-        if not config.enable_empty_arrays.value:
+        if (jax.process_count() ==
+            len(set(d.process_index for d in s.device_set))):
           multihost_utils.assert_equal(
               x, fail_message=(
                   f"{type(x)} passed to device_put is not the same on each"
